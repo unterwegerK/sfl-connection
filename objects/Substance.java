@@ -83,11 +83,11 @@ public class Substance {
         trivialName = getString(substanceObject, TRIVIAL_NAME);
     }
 
-    public static String getString(JSONObject objekt, String name) throws JSONException {
-        if (objekt.isNull(name)) {
+    public static String getString(JSONObject jsonObject, String name) throws JSONException {
+        if (jsonObject.isNull(name)) {
             return null;
         } else {
-            return objekt.getString(name);
+            return jsonObject.getString(name);
         }
     }
 

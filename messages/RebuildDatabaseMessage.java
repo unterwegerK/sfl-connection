@@ -169,27 +169,17 @@ public class RebuildDatabaseMessage extends Message {
 
         //Schalter
         object.put(NUMBER_OF_FLAGS, namedBooleanValues.size());
-        int flagCounter = 0;
-        for(NamedBooleanValue flags : this.namedBooleanValues) {
-
-            JSONObject schalterObjekt = new JSONObject();
-            schalterObjekt.put(FLAG_NAME, flags.getName());
-            schalterObjekt.put(FLAG_STATE, flags.getState());
-
-            object.put(FLAGS + flagCounter, schalterObjekt);
-            flagCounter++;
+        int namedBooleanValueCounter = 0;
+        for(NamedBooleanValue namedBooleanValue : this.namedBooleanValues) {
+            object.put(FLAGS + namedBooleanValueCounter, namedBooleanValue.serialize());
+            namedBooleanValueCounter++;
         }
 
         //Benannte Werte
         object.put(NUMBER_OF_NAMED_VALUES, namedIntegerValues.size());
         int namedIntegerValueCounter = 0;
         for(NamedIntegerValue namedIntegerValue : this.namedIntegerValues) {
-
-            JSONObject wertObjekt = new JSONObject();
-            wertObjekt.put(NAMED_VALUE_NAME, namedIntegerValue.getName());
-            wertObjekt.put(NAMED_VALUE_VALUE, namedIntegerValue.getValue());
-
-            object.put(NAMED_VALUE + namedIntegerValueCounter, wertObjekt);
+            object.put(NAMED_VALUE + namedIntegerValueCounter, namedIntegerValue.serialize());
             namedIntegerValueCounter++;
         }
 
