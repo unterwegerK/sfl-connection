@@ -1,4 +1,4 @@
-package de.ku.sfl.connection;
+package de.ku.sfl.connection.api;
 
 public enum ConnectionState {
     /**

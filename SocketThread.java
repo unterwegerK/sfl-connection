@@ -16,19 +16,22 @@ import java.util.Vector;
  * each connection.
  */
 public class SocketThread extends Thread {
+
+    private static final String TAG = SocketThread.class.getCanonicalName();
+
     private volatile boolean cancel;
 
     private InetSocketAddress serverAddress;
 
     private final Socket socket;
 
-    private Client client;
+    private Connection connection;
     private final ILog log;
     private DataOutputStream outputStream;
 
-    public SocketThread(InetSocketAddress serverAddress, Client client, ILog log) {
+    public SocketThread(InetSocketAddress serverAddress, Connection connection, ILog log) {
         this.serverAddress = serverAddress;
-        this.client = client;
+        this.connection = connection;
         this.log = log;
         socket = new Socket();
     }
@@ -37,7 +40,7 @@ public class SocketThread extends Thread {
     public void run() {
 
         try {
-            log.trace("Opening Socket");
+            log.trace(TAG, "Opening Socket");
             socket.connect(serverAddress, 10000);
 
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
@@ -52,19 +55,19 @@ public class SocketThread extends Thread {
                     boolean isPingMessage = inputStream.readBoolean();
 
                     if(isPingMessage) {
-                        log.trace("Received ping message.");
+                        log.trace(TAG, "Received ping message.");
                         outputStream.writeBoolean(true);
                         outputStream.flush();
                     } else {
                         int length = inputStream.readInt();
                         byte[] buffer = new byte[length];
                         inputStream.read(buffer, 0, length);
-                        log.trace("Received message with " + length + " bytes. ");
+                        log.trace(TAG, "Received message with " + length + " bytes. ");
 
-                        client.handleMessage(buffer);
+                        connection.handleMessage(buffer);
                     }
                 } catch (NoSuchElementException e) {
-                    log.warning("NoSuchElementException thrown...");
+                    log.warning(TAG, "NoSuchElementException thrown...");
                     break;
                 }
                 synchronized (this) {
@@ -74,12 +77,12 @@ public class SocketThread extends Thread {
                 }
             }
 
-            log.trace("Closing Socket.");
+            log.trace(TAG, "Closing Socket.");
             socket.close();
         } catch (IOException e) {
-            log.error("Error while creating socket.", e);
+            log.error(TAG, "Error while creating socket.", e);
         } catch (JSONException e) {
-            log.error("Error while reading message", e);
+            log.error(TAG, "Error while reading message", e);
         }
     }
 
@@ -103,8 +106,8 @@ public class SocketThread extends Thread {
     }
 
     public void sendPendingMessages() {
-        if(client != null && outputStream != null) {
-            Vector<byte[]> messages = client.getPendingMessages();
+        if(connection != null && outputStream != null) {
+            Vector<byte[]> messages = connection.getPendingMessages();
 
             for (byte[] message : messages) {
                 if (socket.isBound() && !socket.isClosed() && socket.isConnected()) {
@@ -112,7 +115,7 @@ public class SocketThread extends Thread {
                         outputStream.writeInt(message.length);
                         outputStream.write(message);
                     } catch (IOException e) {
-                        log.error("Error while sending message.", e);
+                        log.error(TAG, "Error while sending message.", e);
                     }
                 }
             }

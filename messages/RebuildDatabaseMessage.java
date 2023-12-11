@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import de.ku.sfl.connection.ILog;
 import de.ku.sfl.connection.objects.DiscoveredReport;
 import de.ku.sfl.connection.objects.NamedBooleanValue;
 import de.ku.sfl.connection.objects.Image;
@@ -69,7 +70,7 @@ public class RebuildDatabaseMessage extends Message {
         this.namedIntegerValues = namedIntegerValues;
     }
 
-    public RebuildDatabaseMessage(JSONObject object) throws JSONException {
+    public RebuildDatabaseMessage(JSONObject object, ILog log) throws JSONException {
         super(object);
 
         // reports
@@ -78,7 +79,7 @@ public class RebuildDatabaseMessage extends Message {
         for (int i = 0; i < numberOfReports; i++) {
             JSONObject reportObject = object.getJSONObject(REPORT + i);
 
-            reports.add(new DiscoveredReport(reportObject));
+            reports.add(new DiscoveredReport(reportObject, log));
         }
 
         // images

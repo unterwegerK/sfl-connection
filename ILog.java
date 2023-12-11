@@ -2,9 +2,9 @@ package de.ku.sfl.connection;
 
 public interface ILog {
 
-    void trace(String message);
+    void trace(String tag, String message);
 
-    void warning(String message);
+    void warning(String tag, String message);
 
-    void error(String message, Exception exception);
+    void error(String tag, String message, Exception exception);
 }

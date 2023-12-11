@@ -1,22 +1,25 @@
 package de.ku.sfl.connection;
 
-import android.util.Log;
-
 import java.util.Calendar;
 import java.util.TimerTask;
 
+import de.ku.sfl.connection.api.ConnectionState;
+
 public class WatchdogTimerTask extends TimerTask {
+
+    private final static String TAG = WatchdogTimerTask.class.getCanonicalName();
+
     /**
      * Time to wait for a returned ping. If no ping is returned in this time, the connection
      * to the server is disconnected.
      */
     private final static float CONNECTION_TIMEOUT = 100.0f;
 
-    private Client client;
+    private Connection connection;
     private final ILog log;
 
-    public WatchdogTimerTask(Client connectionService, ILog log) {
-        this.client = connectionService;
+    public WatchdogTimerTask(Connection connectionService, ILog log) {
+        this.connection = connectionService;
         this.log = log;
     }
 
@@ -26,19 +29,19 @@ public class WatchdogTimerTask extends TimerTask {
     }
 
     private void checkServerConnection() {
-        if (client.isConnectedToServer()) {
+        if (connection.getConnectionState() == ConnectionState.Connected) {
             float secondsSinceLastPing = (float) (Calendar.getInstance()
-                    .getTimeInMillis() - client.getTimeOfLastPing()
+                    .getTimeInMillis() - connection.getTimeOfLastPing()
                     .getTimeInMillis()) / 1000.0f;
 
             if (secondsSinceLastPing > CONNECTION_TIMEOUT) {
-                log.trace("Closing connection as "
+                log.trace(TAG, "Closing connection as "
                         + secondsSinceLastPing
                         + " seconds since last received ping.");
-                client.disconnectFromServer();
+                connection.connectionIsLost();
             }
-        } else {
-            client.reconnectToServer();
+        } else if(connection.getConnectionState() == ConnectionState.Lost) {
+            connection.connectToServer();
         }
     }
 }

@@ -1,7 +1,5 @@
 package de.ku.sfl.connection.objects;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,10 +12,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
+import de.ku.sfl.connection.ILog;
+
 /**
  * A DiscoveredReport is a report with a discovery time-stamp.
  */
 public class DiscoveredReport extends Report {
+
+    private final static String TAG = DiscoveredReport.class.getCanonicalName();
 
     private final static String ID = "id";
     private final static String INTERNAL_NAME = "internalName";
@@ -81,7 +83,7 @@ public class DiscoveredReport extends Report {
         this.read = read;
     }
 
-    public DiscoveredReport(JSONObject reportObject) throws JSONException {
+    public DiscoveredReport(JSONObject reportObject, ILog log) throws JSONException {
         super(
                 reportObject.getInt(ID),
                 reportObject.getString(INTERNAL_NAME),
@@ -99,7 +101,7 @@ public class DiscoveredReport extends Report {
             discoveryTimestamp = GregorianCalendar.getInstance();
             discoveryTimestamp.setTime(dateFormat.parse(timestampString));
         } catch (ParseException e) {
-            Log.e("Android.Connection", "Error while parsing timestamp " + timestampString + ".", e);
+            log.error(TAG, "Error while parsing timestamp " + timestampString + ".", e);
         }
     }
 

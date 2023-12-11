@@ -6,43 +6,45 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Timer;
 import java.util.Vector;
+
+import de.ku.sfl.connection.api.ConnectionState;
+import de.ku.sfl.connection.api.IConnectionStateListener;
 
 /**
  * This class encapsulates the connection to the server.
  */
-public class Client {
+public class Connection {
 
+    private final static String TAG = Connection.class.getCanonicalName();
 
     /**
      * Interval to check whether the connection is broken or whether the connection should be
      * restored.
      */
     private final static float CHECK_INTERVAL = 3.0f;
+    private final IMessageDispatcher dispatcher;
     private final ILog log;
 
     private SocketThread receiveThread;
 
-    private Vector<IMessageDispatcher> messageDispatchers = new Vector<>();
-
-    public Client(ILog log){
+    public Connection(IMessageDispatcher dispatcher, ILog log){
+        this.dispatcher = dispatcher;
         this.log = log;
-    }
-
-    public void attachDispatcher(IMessageDispatcher messageDispatcher) {
-        synchronized (messageDispatchers) {
-            messageDispatchers.add(messageDispatcher);
-        }
     }
 
     private ConnectionState connectionState = ConnectionState.Disconnected;
 
-    private Queue<byte[]> messages = new LinkedList<>();
+    private Queue<byte[]> messages = new LinkedList<byte[]>();
 
     private Calendar timeOfLastPing = Calendar.getInstance();
+
+    private Set<IConnectionStateListener> connectionStateListeners = new HashSet<IConnectionStateListener>();
 
     private String deviceName = null;
     private InetSocketAddress serverAddress;
@@ -67,15 +69,17 @@ public class Client {
                 synchronized (receiveThread) {
                     receiveThread.wait(10000);
                     connectionState = ConnectionState.Connected;
+                    notifyConnectionStateListeners();
+
                 }
             } catch (SecurityException e) {
-                log.error("Error while connecting to server.", e);
+                log.error(TAG, "Error while connecting to server.", e);
             } catch (IllegalArgumentException e) {
-                log.error("Error while connecting to server.", e);
+                log.error(TAG, "Error while connecting to server.", e);
             } catch (InterruptedException e) {
-                log.error("Error while connecting to server.", e);
+                log.error(TAG, "Error while connecting to server.", e);
             } catch (Exception e) {
-                log.error("Error while connecting to server.", e);
+                log.error(TAG, "Error while connecting to server.", e);
             }
 
             watchdogTimer.cancel();
@@ -87,25 +91,26 @@ public class Client {
     }
 
     public void disconnectFromServer() {
+        terminateConnection();
+        connectionState = ConnectionState.Disconnected;
+        notifyConnectionStateListeners();
+    }
+
+    void connectionIsLost(){
+        terminateConnection();
+        connectionState = ConnectionState.Lost;
+        notifyConnectionStateListeners();
+    }
+
+    private void terminateConnection() {
         if (receiveThread != null) {
             receiveThread.close();
-            connectionState = ConnectionState.Disconnected;
+            receiveThread = null;
         }
     }
 
-    /**
-     * Tries to reconnect to the client with the connection information provided earlier.
-     */
-    public void reconnectToServer() {
-        disconnectFromServer();
-        connectToServer();
-    }
-
-    /**
-     * This method is thread-safe.
-     */
-    public boolean isConnectedToServer() {
-        return receiveThread != null && receiveThread.isConnected();
+    public ConnectionState getConnectionState() {
+        return connectionState;
     }
 
     /**
@@ -141,12 +146,7 @@ public class Client {
      * This method is called whenever a message is received.
      */
     void handleMessage(byte[] message) throws JSONException, IOException {
-
-        synchronized (messageDispatchers) {
-            for (IMessageDispatcher messageDispatcher : messageDispatchers) {
-                messageDispatcher.handleMessage(message);
-            }
-        }
+        dispatcher.handleMessage(message);
     }
 
     /**
@@ -169,6 +169,28 @@ public class Client {
     public Vector<byte[]> getPendingMessages() {
         synchronized (messages) {
             return new Vector<>(messages);
+        }
+    }
+
+    public void registerConnectionStateListeners(Set<IConnectionStateListener> listeners) {
+        connectionStateListeners.addAll(listeners);
+    }
+
+    public void registerConnectionStateListener(IConnectionStateListener listener) {
+        connectionStateListeners.add(listener);
+    }
+
+    public void unregisterConnectionStateListeners(Set<IConnectionStateListener> listeners) {
+        connectionStateListeners.removeAll(listeners);
+    }
+
+    public void unregisterConnectionStateListener(IConnectionStateListener listener) {
+        connectionStateListeners.remove(listener);
+    }
+
+    private void notifyConnectionStateListeners() {
+        for(IConnectionStateListener listener : connectionStateListeners) {
+            listener.connectionStateChanged(connectionState);
         }
     }
 }

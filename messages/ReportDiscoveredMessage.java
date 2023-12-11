@@ -1,7 +1,5 @@
 package de.ku.sfl.connection.messages;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,6 +10,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Vector;
 
+import de.ku.sfl.connection.ILog;
 import de.ku.sfl.connection.objects.BarcodeType;
 import de.ku.sfl.connection.objects.DiscoveredReport;
 import de.ku.sfl.connection.objects.Report;
@@ -29,11 +28,11 @@ public class ReportDiscoveredMessage extends Message {
         report = discoveredReport;
     }
 
-    public ReportDiscoveredMessage(JSONObject messageObject) throws JSONException {
+    public ReportDiscoveredMessage(JSONObject messageObject, ILog log) throws JSONException {
         super(messageObject);
 
         JSONObject reportObject = messageObject.getJSONObject(REPORT);
-        report = new DiscoveredReport(reportObject);
+        report = new DiscoveredReport(reportObject, log);
     }
 
     public Report getDiscoveredReport() {
