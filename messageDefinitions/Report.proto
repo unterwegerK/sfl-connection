@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+package de.ku.sfl.connection.messages;
+
+option java_multiple_files = true;
+
+import "BarcodeType.proto";
+import "ScannerType.proto";
+import "ReportVariant.proto";
+
+message Report {
+    required string key = 2;
+    required string internalName = 4;
+    required BarcodeType barcodeType = 6;
+    required ScannerType scannerType = 7;
+    required string category = 8;
+    required string location = 9;
+    required bool visible = 10;
+    repeated ReportVariant variants = 11;
+
+}

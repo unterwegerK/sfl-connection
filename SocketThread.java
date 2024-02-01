@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
+import de.ku.sfl.connection.api.ILog;
+
 /**
  * This thread handles incoming and outgoing messages. It does not hold state, i.e. it can be recreated for
  * each connection.
@@ -59,12 +61,7 @@ public class SocketThread extends Thread {
                         outputStream.writeBoolean(true);
                         outputStream.flush();
                     } else {
-                        int length = inputStream.readInt();
-                        byte[] buffer = new byte[length];
-                        inputStream.read(buffer, 0, length);
-                        log.trace(TAG, "Received message with " + length + " bytes. ");
-
-                        connection.handleMessage(buffer);
+                        connection.handleMessage(inputStream);
                     }
                 } catch (NoSuchElementException e) {
                     log.warning(TAG, "NoSuchElementException thrown...");

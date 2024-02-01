@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package de.ku.sfl.connection.messages;
+
+option java_multiple_files = true;
+
+
+message ReportVariant {
+    required string externalName = 1;
+    required string description = 2;
+    required int32 priority = 3;
+    repeated int32 dependencies = 4;
+}

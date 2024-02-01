@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.TimerTask;
 
 import de.ku.sfl.connection.api.ConnectionState;
+import de.ku.sfl.connection.api.ILog;
 
 public class WatchdogTimerTask extends TimerTask {
 

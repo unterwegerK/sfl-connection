@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package de.ku.sfl.connection.messages;
+
+option java_multiple_files = true;
+
+import "MessageType.proto";
+
+message MessageDescription {
+    required MessageType messageType = 1;
+}

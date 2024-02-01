@@ -2,6 +2,9 @@ package de.ku.sfl.connection.objects;
 import java.util.List;
 import java.util.Vector;
 
+import de.ku.sfl.connection.messages.BarcodeType;
+import de.ku.sfl.connection.messages.ScannerType;
+
 /**
  * A report is a discovereable unit of information. A report has an internal name for the
  * game masters. The text that is shown to the players as the description can change during the
@@ -34,23 +37,6 @@ public class Report {
             String externalName,
             String internalName,
             String description,
-            BarcodeType barcodeType,
-            ScannerType scannerType,
-            String categorie,
-            String location,
-            int numberOfInstances) {
-        this(0, externalName, internalName, description, "", barcodeType, scannerType, categorie,
-                location, numberOfInstances);
-    }
-
-    /**
-     * Creates a report with the given values and one variant with priority 0.
-     */
-    public Report(
-            int id,
-            String externalName,
-            String internalName,
-            String description,
             String key,
             BarcodeType barcodeType,
             ScannerType scannerType,
@@ -76,7 +62,6 @@ public class Report {
      * Creates a report with the given values and variants.
      */
     public Report(
-            int id,
             String internalName,
             String key,
             int barcodeType,
@@ -86,7 +71,7 @@ public class Report {
             String category,
             String location,
             int numberOfInstances) {
-        this(id, internalName, key, BarcodeType.values()[barcodeType],
+        this(internalName, key, BarcodeType.values()[barcodeType],
                 ScannerType.values()[scannerType], visible, variants, category, location, numberOfInstances);
     }
 
@@ -94,7 +79,6 @@ public class Report {
      * Creates a report with the given values and variants.
      */
     public Report(
-            int id,
             String internerName,
             String schluessel,
             BarcodeType barcodeType,
@@ -104,7 +88,6 @@ public class Report {
             String categories,
             String location,
             int numberOfInstances) {
-        this.id = id;
         this.internalName = internerName;
         this.key = schluessel;
         this.barcodeType = barcodeType;

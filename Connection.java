@@ -2,6 +2,7 @@ package de.ku.sfl.connection;
 
 import org.json.JSONException;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -13,8 +14,10 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.Vector;
 
+import de.ku.sfl.androidConnectedDataModel.MessageDispatcher;
 import de.ku.sfl.connection.api.ConnectionState;
 import de.ku.sfl.connection.api.IConnectionStateListener;
+import de.ku.sfl.connection.api.ILog;
 
 /**
  * This class encapsulates the connection to the server.
@@ -28,12 +31,12 @@ public class Connection {
      * restored.
      */
     private final static float CHECK_INTERVAL = 3.0f;
-    private final IMessageDispatcher dispatcher;
+    private final MessageDispatcher dispatcher;
     private final ILog log;
 
     private SocketThread receiveThread;
 
-    public Connection(IMessageDispatcher dispatcher, ILog log){
+    public Connection(MessageDispatcher dispatcher, ILog log){
         this.dispatcher = dispatcher;
         this.log = log;
     }
@@ -145,8 +148,8 @@ public class Connection {
     /**
      * This method is called whenever a message is received.
      */
-    void handleMessage(byte[] message) throws JSONException, IOException {
-        dispatcher.handleMessage(message);
+    void handleMessage(DataInputStream inputStream) throws JSONException, IOException {
+        dispatcher.dispatchMessage(inputStream);
     }
 
     /**
